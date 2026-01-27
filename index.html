@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ottimizzatore Generatore Vapore - MECNA AUTOMAZIONE</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .info-box {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .info-box strong {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+        
+        .main-input {
+            background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+            border: 4px solid #667eea;
+            padding: 40px;
+            margin: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .main-input h2 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .main-input label {
+            display: block;
+            font-weight: 600;
+            color: #2a5298;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            text-align: center;
+        }
+        
+        .main-input input[type="range"] {
+            width: 100%;
+            margin: 15px 0;
+            cursor: pointer;
+            height: 8px;
+        }
+        
+        .value-display {
+            text-align: center;
+            font-size: 3em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+        }
+        
+        .secondary-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px 30px;
+            background: #f8f9fa;
+        }
+        
+        .control-group {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .control-group label {
+            display: block;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+        
+        .control-group input[type="range"] {
+            width: 100%;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+        
+        .control-group .value-display {
+            font-size: 1.3em;
+            margin: 8px 0;
+        }
+        
+        .optimization-result {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 30px;
+            margin: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+        }
+        
+        .optimization-result h2 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .optimal-config {
+            background: rgba(255,255,255,0.2);
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .optimal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .optimal-item {
+            text-align: center;
+        }
+        
+        .optimal-item .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        
+        .optimal-item .value {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+        
+        .comparison-table {
+            background: white;
+            margin: 20px 30px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+        
+        .comparison-table h3 {
+            color: #2a5298;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        tr.optimal-row {
+            background: #d4edda !important;
+            font-weight: bold;
+        }
+        
+        tr.optimal-row td {
+            border: 2px solid #28a745;
+        }
+        
+        .charts {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            position: relative;
+            height: 400px;
+        }
+        
+        .generator-recommendation {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            margin: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        
+        .badge-optimal {
+            background: #28a745;
+            color: white;
+        }
+        
+        .badge-good {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .badge-poor {
+            background: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Ottimizzatore Generatore Vapore</h1>
+            <p>Trova automaticamente la configurazione ottimale - MECNA AUTOMAZIONE S.r.l.</p>
+            <div class="info-box">
+                <strong>🤖 Ottimizzazione Intelligente</strong>
+                <p>Il sistema calcola automaticamente il miglior compromesso tra tempo di sterilizzazione, volume vasca e efficienza del generatore per massimizzare le prestazioni e minimizzare i costi.</p>
+            </div>
+        </div>
+        
+        <div class="main-input">
+            <h2>📊 Produzione Desiderata</h2>
+            <label for="targetProduction">Terriccio Sterilizzato (m³/h)</label>
+            <input type="range" id="targetProduction" min="1" max="15" step="0.5" value="9">
+            <div class="value-display"><span id="targetProductionValue">9.0</span> m³/h</div>
+        </div>
+        
+        <details style="margin: 0 30px 20px 30px;">
+            <summary style="cursor: pointer; padding: 15px; background: #f8f9fa; border-radius: 8px; font-weight: bold;">⚙️ Parametri Avanzati (opzionale)</summary>
+            <div class="secondary-controls" style="margin-top: 15px;">
+                <div class="control-group">
+                    <label>Densità Terriccio (kg/m³)</label>
+                    <input type="range" id="soilDensity" min="350" max="650" step="50" value="500">
+                    <div class="value-display"><span id="soilDensityValue">500</span> kg/m³</div>
+                </div>
+                
+                <div class="control-group">
+                    <label>Umidità Terriccio (%)</label>
+                    <input type="range" id="moisture" min="30" max="60" step="5" value="45">
+                    <div class="value-display"><span id="moistureValue">45</span> %</div>
+                </div>
+                
+                <div class="control-group">
+                    <label>Temperatura Target (°C)</label>
+                    <input type="range" id="targetTemp" min="75" max="95" step="5" value="85">
+                    <div class="value-display"><span id="targetTempValue">85</span> °C</div>
+                </div>
+            </div>
+        </details>
+        
+        <div id="optimizationResult"></div>
+        
+        <div id="comparisonTable"></div>
+        
+        <div id="recommendationBox"></div>
+        
+        <div class="charts">
+            <div class="chart-container">
+                <canvas id="optimizationChart"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="utilizationChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CONSTANTS = {
+            cpSoilDry: 0.8,
+            cpWater: 4.186,
+            heatVaporization: 2300,
+            ambientTemp: 20,
+            vaporEnthalpy: 2763,
+            waterEnthalpy: 84,
+            evaporationRate: 0.025,
+            heatLoss: 0.10,
+            vesselHeat: 6000,
+            dieselPCI: 11.83,
+            dieselDensity: 0.84,
+            dieselPrice: 1.65,
+            electricityPrice: 0.20,
+            generatorEfficiency: 0.91,
+            CYCLE_TIME: 20
+        };
+
+        const GENERATORS = [
+            { capacity: 200, cost: 28000, power: 155 },
+            { capacity: 300, cost: 35000, power: 232 },
+            { capacity: 400, cost: 38000, power: 310 },
+            { capacity: 500, cost: 42000, power: 387 },
+            { capacity: 600, cost: 48000, power: 465 },
+            { capacity: 800, cost: 58000, power: 620 },
+            { capacity: 900, cost: 66000, power: 697 },
+            { capacity: 1000, cost: 72000, power: 775 },
+            { capacity: 1200, cost: 85000, power: 930 },
+            { capacity: 1500, cost: 105000, power: 1163 }
+        ];
+
+        let charts = { optimization: null, utilization: null };
+
+        function calculateEnergy(batchSize, soilDensity, moisture, targetTemp) {
+            const totalMass = batchSize * soilDensity;
+            const dryMass = totalMass * (1 - moisture/100);
+            const waterMass = totalMass * (moisture/100);
+            const deltaT = targetTemp - CONSTANTS.ambientTemp;
+            
+            const Q1 = dryMass * CONSTANTS.cpSoilDry * deltaT;
+            const Q2 = waterMass * CONSTANTS.cpWater * deltaT;
+            const evaporatedWater = waterMass * CONSTANTS.evaporationRate;
+            const Q3 = evaporatedWater * CONSTANTS.heatVaporization;
+            const Q4 = (Q1 + Q2 + Q3) * CONSTANTS.heatLoss;
+            const Q5 = CONSTANTS.vesselHeat;
+            
+            const totalEnergy = Q1 + Q2 + Q3 + Q4 + Q5;
+            
+            return {
+                total: totalEnergy / 3600,
+                totalKJ: totalEnergy
+            };
+        }
+
+        function calculateSteamFlow(energy, treatmentTime) {
+            const usefulHeat = CONSTANTS.vaporEnthalpy - CONSTANTS.waterEnthalpy;
+            const steamPerBatch = energy.totalKJ / usefulHeat;
+            const timeHours = treatmentTime / 60;
+            const steamFlowAvg = steamPerBatch / timeHours;
+            const steamPeak = (steamPerBatch * 0.65) / (10/60);
+            
+            return { perBatch: steamPerBatch, avgFlow: steamFlowAvg, peakFlow: steamPeak };
+        }
+
+        function findOptimalGenerator(peakFlow) {
+            const required = peakFlow * 1.20;
+            return GENERATORS.find(g => g.capacity >= required) || GENERATORS[GENERATORS.length - 1];
+        }
+
+        function optimizeConfiguration(targetProduction, soilDensity, moisture, targetTemp) {
+            const configurations = [];
+            
+            // Testa tempi da 15 a 20 minuti
+            for (let time = 15; time <= 20; time += 1) {
+                const batchesPerHour = 60 / CONSTANTS.CYCLE_TIME;
+                const batchSize = targetProduction / batchesPerHour;
+                
+                const energy = calculateEnergy(batchSize, soilDensity, moisture, targetTemp);
+                const steam = calculateSteamFlow(energy, time);
+                const generator = findOptimalGenerator(steam.peakFlow);
+                
+                const utilization = (steam.peakFlow * 1.20) / generator.capacity * 100;
+                
+                // Calcolo costi
+                const dieselConsumption = (energy.total * targetProduction / batchSize) / 
+                                         (CONSTANTS.dieselPCI * CONSTANTS.generatorEfficiency);
+                const dieselLiters = dieselConsumption / CONSTANTS.dieselDensity;
+                const hourlyCost = dieselLiters * CONSTANTS.dieselPrice + 25.9 * CONSTANTS.electricityPrice;
+                const annualCost = hourlyCost * 2000; // 2000h/anno
+                
+                // Costo vasca (stimato)
+                const vesselCost = 20000 + batchSize * 3000; // Base + per m³
+                
+                // Costo totale 5 anni
+                const totalCost5Years = generator.cost + vesselCost + (annualCost * 5);
+                
+                // Score ottimizzazione (più basso è meglio)
+                // Preferisce: utilizzo 70-85%, tempo ≥17 min, costi bassi
+                let score = 0;
+                score += Math.abs(utilization - 77.5) * 2; // Penalità distanza da 77.5%
+                score += (20 - time) * 100; // Preferenza per tempi più lunghi
+                score += totalCost5Years / 1000; // Peso costi
+                
+                configurations.push({
+                    treatmentTime: time,
+                    batchSize: batchSize,
+                    energy: energy,
+                    steam: steam,
+                    generator: generator,
+                    utilization: utilization,
+                    dieselLiters: dieselLiters,
+                    hourlyCost: hourlyCost,
+                    annualCost: annualCost,
+                    vesselCost: vesselCost,
+                    totalCost5Years: totalCost5Years,
+                    score: score
+                });
+            }
+            
+            // Trova configurazione ottimale (score minimo)
+            configurations.sort((a, b) => a.score - b.score);
+            return configurations;
+        }
+
+        function updateCalculations() {
+            const targetProduction = parseFloat(document.getElementById('targetProduction').value);
+            const soilDensity = parseFloat(document.getElementById('soilDensity').value);
+            const moisture = parseFloat(document.getElementById('moisture').value);
+            const targetTemp = parseFloat(document.getElementById('targetTemp').value);
+            
+            document.getElementById('targetProductionValue').textContent = targetProduction.toFixed(1);
+            document.getElementById('soilDensityValue').textContent = soilDensity.toFixed(0);
+            document.getElementById('moistureValue').textContent = moisture.toFixed(0);
+            document.getElementById('targetTempValue').textContent = targetTemp.toFixed(0);
+            
+            const configurations = optimizeConfiguration(targetProduction, soilDensity, moisture, targetTemp);
+            const optimal = configurations[0];
+            
+            displayOptimizationResult(optimal, targetProduction);
+            displayComparisonTable(configurations, targetProduction);
+            displayGeneratorRecommendation(optimal);
+            updateCharts(configurations);
+        }
+
+        function displayOptimizationResult(optimal, targetProduction) {
+            const batchesPerHour = 60 / CONSTANTS.CYCLE_TIME;
+            
+            const html = `
+                <div class="optimization-result">
+                    <h2>✨ Configurazione Ottimale</h2>
+                    <div class="optimal-config">
+                        <div style="text-align: center; margin-bottom: 15px;">
+                            <span class="badge badge-optimal">CONFIGURAZIONE OTTIMIZZATA</span>
+                        </div>
+                        <div class="optimal-grid">
+                            <div class="optimal-item">
+                                <div class="label">Tempo Trattamento</div>
+                                <div class="value">${optimal.treatmentTime} min</div>
+                            </div>
+                            <div class="optimal-item">
+                                <div class="label">Volume Vasca</div>
+                                <div class="value">${optimal.batchSize.toFixed(1)} m³</div>
+                            </div>
+                            <div class="optimal-item">
+                                <div class="label">Batch/Ora</div>
+                                <div class="value">${batchesPerHour}</div>
+                            </div>
+                            <div class="optimal-item">
+                                <div class="label">Generatore</div>
+                                <div class="value">${optimal.generator.capacity} kg/h</div>
+                            </div>
+                            <div class="optimal-item">
+                                <div class="label">Utilizzo</div>
+                                <div class="value">${optimal.utilization.toFixed(0)}%</div>
+                            </div>
+                            <div class="optimal-item">
+                                <div class="label">Costo Orario</div>
+                                <div class="value">${optimal.hourlyCost.toFixed(2)} €</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 8px;">
+                        <p style="font-size: 1.1em; text-align: center; margin-bottom: 10px;">
+                            <strong>💡 Perché questa configurazione?</strong>
+                        </p>
+                        <ul style="list-style-position: inside; line-height: 1.8;">
+                            <li>Utilizzo generatore ottimale: ${optimal.utilization.toFixed(0)}% (ideale 70-85%)</li>
+                            <li>Tempo sterilizzazione: ${optimal.treatmentTime} min (sicuro ed efficace)</li>
+                            <li>Investimento generatore: ${optimal.generator.cost.toLocaleString('it-IT')} €</li>
+                            <li>Costo operativo annuale: ${optimal.annualCost.toFixed(0).toLocaleString('it-IT')} € (2000h)</li>
+                            <li>Costo totale 5 anni: ${optimal.totalCost5Years.toFixed(0).toLocaleString('it-IT')} €</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('optimizationResult').innerHTML = html;
+        }
+
+        function displayComparisonTable(configurations, targetProduction) {
+            const batchesPerHour = 60 / CONSTANTS.CYCLE_TIME;
+            
+            let html = `
+                <div class="comparison-table">
+                    <h3>📊 Confronto Configurazioni</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tempo<br>Trattamento</th>
+                                <th>Volume<br>Vasca</th>
+                                <th>Portata<br>Picco</th>
+                                <th>Generatore<br>Necessario</th>
+                                <th>Utilizzo<br>Generatore</th>
+                                <th>Costo<br>Orario</th>
+                                <th>Costo Totale<br>5 Anni</th>
+                                <th>Valutazione</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            configurations.forEach((config, index) => {
+                const isOptimal = index === 0;
+                const badge = config.utilization >= 70 && config.utilization <= 85 ? 
+                    '<span class="badge badge-optimal">OTTIMO</span>' :
+                    config.utilization > 85 ? 
+                    '<span class="badge badge-good">BUONO</span>' :
+                    '<span class="badge badge-poor">SOVRADIM.</span>';
+                
+                html += `
+                    <tr class="${isOptimal ? 'optimal-row' : ''}">
+                        <td>${config.treatmentTime} min</td>
+                        <td>${config.batchSize.toFixed(1)} m³</td>
+                        <td>${config.steam.peakFlow.toFixed(0)} kg/h</td>
+                        <td>${config.generator.capacity} kg/h</td>
+                        <td>${config.utilization.toFixed(0)}%</td>
+                        <td>${config.hourlyCost.toFixed(2)} €/h</td>
+                        <td>${config.totalCost5Years.toFixed(0).toLocaleString('it-IT')} €</td>
+                        <td>${badge}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                    <p style="margin-top: 15px; font-size: 0.9em; color: #666;">
+                        <strong>Nota:</strong> La riga evidenziata in verde rappresenta la configurazione ottimale. 
+                        L'utilizzo ideale del generatore è 70-85% per massimizzare efficienza e durata.
+                    </p>
+                </div>
+            `;
+            
+            document.getElementById('comparisonTable').innerHTML = html;
+        }
+
+        function displayGeneratorRecommendation(optimal) {
+            const html = `
+                <div class="generator-recommendation">
+                    <h2>🔥 Generatore Consigliato</h2>
+                    <div style="background: rgba(255,255,255,0.2); padding: 25px; border-radius: 10px;">
+                        <h3 style="font-size: 2.5em; margin-bottom: 15px; text-align: center;">
+                            ⭐ ${optimal.generator.capacity} kg/h
+                        </h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.9em; opacity: 0.9;">Tipo</div>
+                                <div style="font-size: 1.5em; font-weight: bold;">Tubi d'Acqua</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.9em; opacity: 0.9;">Potenza Focolare</div>
+                                <div style="font-size: 1.5em; font-weight: bold;">${optimal.generator.power} kW</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.9em; opacity: 0.9;">Investimento</div>
+                                <div style="font-size: 1.5em; font-weight: bold;">${optimal.generator.cost.toLocaleString('it-IT')} €</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.9em; opacity: 0.9;">Utilizzo Picco</div>
+                                <div style="font-size: 1.5em; font-weight: bold;">${optimal.utilization.toFixed(0)}%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 8px; margin-top: 20px;">
+                        <h4 style="margin-bottom: 10px;">📈 Dati Operativi</h4>
+                        <ul style="list-style-position: inside; line-height: 1.8;">
+                            <li>Vapore per batch: ${optimal.steam.perBatch.toFixed(1)} kg</li>
+                            <li>Portata media: ${optimal.steam.avgFlow.toFixed(0)} kg/h</li>
+                            <li>Portata picco: ${optimal.steam.peakFlow.toFixed(0)} kg/h</li>
+                            <li>Consumo gasolio: ${optimal.dieselLiters.toFixed(1)} l/h</li>
+                            <li>Costo operativo: ${optimal.hourlyCost.toFixed(2)} €/h</li>
+                            <li>Costo annuale (2000h): ${optimal.annualCost.toFixed(0).toLocaleString('it-IT')} €/anno</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('recommendationBox').innerHTML = html;
+        }
+
+        function updateCharts(configurations) {
+            createOptimizationChart(configurations);
+            createUtilizationChart(configurations);
+        }
+
+        function createOptimizationChart(configurations) {
+            const ctx = document.getElementById('optimizationChart');
+            
+            const times = configurations.map(c => c.treatmentTime + ' min');
+            const costs = configurations.map(c => c.totalCost5Years / 1000);
+            const utilizations = configurations.map(c => c.utilization);
+            
+            if (charts.optimization) {
+                charts.optimization.destroy();
+            }
+            
+            charts.optimization = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: times,
+                    datasets: [{
+                        label: 'Costo Totale 5 Anni (k€)',
+                        data: costs,
+                        backgroundColor: 'rgba(102, 126, 234, 0.6)',
+                        borderColor: '#667eea',
+                        borderWidth: 2,
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Utilizzo Generatore (%)',
+                        data: utilizations,
+                        type: 'line',
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        borderWidth: 3,
+                        pointRadius: 6,
+                        pointBackgroundColor: '#28a745',
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Analisi Costi vs Efficienza per Tempo di Trattamento',
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            title: { display: true, text: 'Costo Totale 5 Anni (k€)' },
+                            beginAtZero: false
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            title: { display: true, text: 'Utilizzo Generatore (%)' },
+                            min: 60,
+                            max: 100,
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createUtilizationChart(configurations) {
+            const ctx = document.getElementById('utilizationChart');
+            
+            const times = configurations.map(c => c.treatmentTime + ' min');
+            const batchSizes = configurations.map(c => c.batchSize);
+            const peakFlows = configurations.map(c => c.steam.peakFlow);
+            const genCapacities = configurations.map(c => c.generator.capacity);
+            
+            if (charts.utilization) {
+                charts.utilization.destroy();
+            }
+            
+            charts.utilization = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: times,
+                    datasets: [{
+                        label: 'Volume Vasca (m³)',
+                        data: batchSizes,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Portata Picco (kg/h)',
+                        data: peakFlows,
+                        borderColor: '#dc3545',
+                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                        borderWidth: 3,
+                        yAxisID: 'y1'
+                    }, {
+                        label: 'Capacità Generatore (kg/h)',
+                        data: genCapacities,
+                        borderColor: '#ffc107',
+                        borderDash: [5, 5],
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Volume Vasca e Portata Vapore per Tempo di Trattamento',
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            title: { display: true, text: 'Volume Vasca (m³)' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            title: { display: true, text: 'Portata Vapore (kg/h)' },
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('input[type="range"]').forEach(input => {
+                input.addEventListener('input', updateCalculations);
+            });
+            updateCalculations();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dimensionamento Generatore Vapore - MECNA AUTOMAZIONE</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .info-box {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .info-box strong {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        
+        .control-group {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .control-group.primary {
+            border: 3px solid #667eea;
+            background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+        }
+        
+        .control-group label {
+            display: block;
+            font-weight: 600;
+            color: #2a5298;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+        
+        .control-group.primary label {
+            color: #667eea;
+            font-size: 1.1em;
+        }
+        
+        .control-group small {
+            font-size: 0.85em;
+            color: #666;
+        }
+        
+        .control-group input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+        
+        .value-display {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 5px;
+        }
+        
+        .control-group.primary .value-display {
+            font-size: 2em;
+        }
+        
+        .calculated-params {
+            background: #e3f2fd;
+            padding: 20px;
+            margin: 20px 30px;
+            border-radius: 10px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .calculated-params h3 {
+            color: #1976d2;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .calc-item {
+            text-align: center;
+        }
+        
+        .calc-item .label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .calc-item .value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #1976d2;
+        }
+        
+        .charts {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            position: relative;
+            height: 400px;
+        }
+        
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            padding: 20px 30px 30px 30px;
+            background: #f8f9fa;
+        }
+        
+        .result-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .result-card h3 {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .result-card .value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2a5298;
+        }
+        
+        .result-card .unit {
+            font-size: 0.9em;
+            color: #888;
+            margin-left: 5px;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 30px;
+            border-radius: 5px;
+        }
+        
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 30px;
+            border-radius: 5px;
+        }
+        
+        .generator-recommendation {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            margin: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .generator-recommendation h2 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+        
+        .generator-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .generator-option {
+            background: rgba(255,255,255,0.15);
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+        }
+        
+        .generator-option.recommended {
+            border-color: #ffc107;
+            background: rgba(255,193,7,0.2);
+        }
+        
+        .generator-option h3 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        
+        .generator-option .spec {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+        
+        details {
+            cursor: pointer;
+        }
+        
+        details summary {
+            padding: 10px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        details summary:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        details[open] summary {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Dimensionamento Generatore Vapore</h1>
+            <p>Sterilizzazione Terriccio - MECNA AUTOMAZIONE S.r.l.</p>
+            <div class="info-box">
+                <strong>⏱️ Ciclo di Lavoro Fisso: 20 minuti</strong>
+                <p>Tempo tra spostamenti: Vasca 1 → Vasca 2 → Vasca 3 (ogni 20 min)</p>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group primary">
+                <label for="targetProduction">🎯 PRODUZIONE TARGET (m³/h)</label>
+                <input type="range" id="targetProduction" min="3" max="15" step="0.5" value="9">
+                <div class="value-display"><span id="targetProductionValue">9.0</span> m³/h</div>
+                <small>Parametro principale - determina volume vasca</small>
+            </div>
+            
+            <div class="control-group">
+                <label for="treatmentTime">Tempo Trattamento (min)</label>
+                <input type="range" id="treatmentTime" min="15" max="20" step="1" value="20">
+                <div class="value-display"><span id="treatmentTimeValue">20</span> min</div>
+                <small>Max 20 min (limite ciclo fisso)</small>
+            </div>
+            
+            <div class="control-group">
+                <label for="soilDensity">Densità Terriccio (kg/m³)</label>
+                <input type="range" id="soilDensity" min="350" max="650" step="50" value="500">
+                <div class="value-display"><span id="soilDensityValue">500</span> kg/m³</div>
+                <small>Tipico: 400-600 kg/m³</small>
+            </div>
+            
+            <div class="control-group">
+                <label for="moisture">Umidità Terriccio (%)</label>
+                <input type="range" id="moisture" min="30" max="60" step="5" value="45">
+                <div class="value-display"><span id="moistureValue">45</span> %</div>
+                <small>Umidità ottimale: 40-50%</small>
+            </div>
+            
+            <div class="control-group">
+                <label for="targetTemp">Temperatura Target (°C)</label>
+                <input type="range" id="targetTemp" min="75" max="95" step="5" value="85">
+                <div class="value-display"><span id="targetTempValue">85</span> °C</div>
+                <small>Consigliato: 80-90°C</small>
+            </div>
+        </div>
+        
+        <div class="calculated-params">
+            <h3>📐 Parametri Calcolati Automaticamente</h3>
+            <div class="calc-grid">
+                <div class="calc-item">
+                    <div class="label">Volume Vasca</div>
+                    <div class="value"><span id="calcBatchSize">3.0</span> m³</div>
+                </div>
+                <div class="calc-item">
+                    <div class="label">Batch/Ora</div>
+                    <div class="value"><span id="calcBatchesPerHour">3</span></div>
+                </div>
+                <div class="calc-item">
+                    <div class="label">Ciclo Completo</div>
+                    <div class="value">60 min</div>
+                </div>
+                <div class="calc-item">
+                    <div class="label">Vasche Attive</div>
+                    <div class="value">3</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="results" id="results"></div>
+        
+        <div id="recommendationBox"></div>
+        
+        <div class="charts">
+            <div class="chart-container">
+                <canvas id="temperatureChart"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="steamFlowChart"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="energyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Costanti fisiche
+        const CONSTANTS = {
+            cpSoilDry: 0.8,
+            cpWater: 4.186,
+            heatVaporization: 2300,
+            ambientTemp: 20,
+            vaporPressure: 6,
+            vaporEnthalpy: 2763,
+            waterEnthalpy: 84,
+            evaporationRate: 0.025,
+            heatLoss: 0.10,
+            vesselHeat: 6000,
+            dieselPCI: 11.83,
+            dieselDensity: 0.84,
+            dieselPrice: 1.65,
+            electricityPrice: 0.20,
+            generatorEfficiency: 0.91,
+            CYCLE_TIME: 20  // Ciclo fisso 20 minuti
+        };
+
+        let charts = {
+            temperature: null,
+            steamFlow: null,
+            energy: null
+        };
+
+        function calculateBatchSize(targetProduction) {
+            // Con ciclo fisso di 20 minuti, ho 3 batch/ora
+            const batchesPerHour = 60 / CONSTANTS.CYCLE_TIME;
+            return targetProduction / batchesPerHour;
+        }
+
+        function calculateEnergy(batchSize, soilDensity, moisture, targetTemp) {
+            const totalMass = batchSize * soilDensity;
+            const dryMass = totalMass * (1 - moisture/100);
+            const waterMass = totalMass * (moisture/100);
+            const deltaT = targetTemp - CONSTANTS.ambientTemp;
+            
+            const Q1 = dryMass * CONSTANTS.cpSoilDry * deltaT;
+            const Q2 = waterMass * CONSTANTS.cpWater * deltaT;
+            const evaporatedWater = waterMass * CONSTANTS.evaporationRate;
+            const Q3 = evaporatedWater * CONSTANTS.heatVaporization;
+            const Q4 = (Q1 + Q2 + Q3) * CONSTANTS.heatLoss;
+            const Q5 = CONSTANTS.vesselHeat;
+            
+            const totalEnergy = Q1 + Q2 + Q3 + Q4 + Q5;
+            
+            return {
+                Q1: Q1 / 3600,
+                Q2: Q2 / 3600,
+                Q3: Q3 / 3600,
+                Q4: Q4 / 3600,
+                Q5: Q5 / 3600,
+                total: totalEnergy / 3600,
+                totalKJ: totalEnergy
+            };
+        }
+
+        function calculateSteamFlow(energy, treatmentTime) {
+            const usefulHeat = CONSTANTS.vaporEnthalpy - CONSTANTS.waterEnthalpy;
+            const steamPerBatch = energy.totalKJ / usefulHeat;
+            const timeHours = treatmentTime / 60;
+            const steamFlowAvg = steamPerBatch / timeHours;
+            const steamPeak = (steamPerBatch * 0.65) / (10/60);
+            
+            return {
+                perBatch: steamPerBatch,
+                avgFlow: steamFlowAvg,
+                peakFlow: steamPeak
+            };
+        }
+
+        function recommendGenerator(steamFlow) {
+            const generators = [
+                { capacity: 200, name: '200 kg/h', cost: 28000, size: 'Compatto', power: 155 },
+                { capacity: 300, name: '300 kg/h', cost: 35000, size: 'Medio', power: 232 },
+                { capacity: 400, name: '400 kg/h', cost: 38000, size: 'Medio', power: 310 },
+                { capacity: 500, name: '500 kg/h', cost: 42000, size: 'Medio-Grande', power: 387 },
+                { capacity: 600, name: '600 kg/h', cost: 48000, size: 'Grande', power: 465 },
+                { capacity: 800, name: '800 kg/h', cost: 58000, size: 'Grande', power: 620 }
+            ];
+            
+            const requiredCapacity = steamFlow.peakFlow * 1.20;
+            let recommended = generators.find(g => g.capacity >= requiredCapacity);
+            
+            if (!recommended) {
+                recommended = generators[generators.length - 1];
+                recommended.oversized = true;
+            }
+            
+            return {
+                recommended: recommended,
+                all: generators,
+                requiredCapacity: requiredCapacity
+            };
+        }
+
+        function updateCalculations() {
+            const targetProduction = parseFloat(document.getElementById('targetProduction').value);
+            const soilDensity = parseFloat(document.getElementById('soilDensity').value);
+            const moisture = parseFloat(document.getElementById('moisture').value);
+            const targetTemp = parseFloat(document.getElementById('targetTemp').value);
+            const treatmentTime = parseFloat(document.getElementById('treatmentTime').value);
+            
+            // Calcola volume batch automaticamente
+            const batchSize = calculateBatchSize(targetProduction);
+            const batchesPerHour = 60 / CONSTANTS.CYCLE_TIME;
+            
+            const energy = calculateEnergy(batchSize, soilDensity, moisture, targetTemp);
+            const steam = calculateSteamFlow(energy, treatmentTime);
+            const generator = recommendGenerator(steam);
+            
+            const dieselConsumption = (energy.total * targetProduction / batchSize) / 
+                                     (CONSTANTS.dieselPCI * CONSTANTS.generatorEfficiency);
+            const dieselLiters = dieselConsumption / CONSTANTS.dieselDensity;
+            const hourlyCost = dieselLiters * CONSTANTS.dieselPrice + 25.9 * CONSTANTS.electricityPrice;
+            
+            // Aggiorna display
+            document.getElementById('targetProductionValue').textContent = targetProduction.toFixed(1);
+            document.getElementById('soilDensityValue').textContent = soilDensity.toFixed(0);
+            document.getElementById('moistureValue').textContent = moisture.toFixed(0);
+            document.getElementById('targetTempValue').textContent = targetTemp.toFixed(0);
+            document.getElementById('treatmentTimeValue').textContent = treatmentTime.toFixed(0);
+            
+            // Aggiorna parametri calcolati
+            document.getElementById('calcBatchSize').textContent = batchSize.toFixed(1);
+            document.getElementById('calcBatchesPerHour').textContent = batchesPerHour.toFixed(0);
+            
+            const feasible = treatmentTime <= CONSTANTS.CYCLE_TIME;
+            
+            updateResults(energy, steam, batchSize, batchesPerHour, generator, dieselLiters, hourlyCost, treatmentTime, feasible);
+            updateCharts(batchSize, targetProduction, energy, steam, generator, treatmentTime, targetTemp);
+        }
+
+        function updateResults(energy, steam, batchSize, batchesPerHour, generator, dieselLiters, hourlyCost, treatmentTime, feasible) {
+            const resultsHTML = `
+                <div class="result-card">
+                    <h3>Volume Vasca</h3>
+                    <div class="value">${batchSize.toFixed(1)}<span class="unit">m³</span></div>
+                </div>
+                <div class="result-card">
+                    <h3>Energia per Batch</h3>
+                    <div class="value">${energy.total.toFixed(1)}<span class="unit">kWh</span></div>
+                </div>
+                <div class="result-card">
+                    <h3>Vapore per Batch</h3>
+                    <div class="value">${steam.perBatch.toFixed(1)}<span class="unit">kg</span></div>
+                </div>
+                <div class="result-card">
+                    <h3>Portata Picco</h3>
+                    <div class="value">${steam.peakFlow.toFixed(0)}<span class="unit">kg/h</span></div>
+                </div>
+                <div class="result-card">
+                    <h3>Portata Media</h3>
+                    <div class="value">${steam.avgFlow.toFixed(0)}<span class="unit">kg/h</span></div>
+                </div>
+                <div class="result-card">
+                    <h3>Batch/Ora</h3>
+                    <div class="value">${batchesPerHour.toFixed(0)}<span class="unit">batch/h</span></div>
+                </div>
+                <div class="result-card">
+                    <h3>Gasolio</h3>
+                    <div class="value">${dieselLiters.toFixed(1)}<span class="unit">l/h</span></div>
+                </div>
+                <div class="result-card">
+                    <h3>Costo Orario</h3>
+                    <div class="value">${hourlyCost.toFixed(2)}<span class="unit">€/h</span></div>
+                </div>
+            `;
+            
+            document.getElementById('results').innerHTML = resultsHTML;
+            
+            let recommendationHTML = '';
+            
+            if (!feasible) {
+                recommendationHTML = `
+                    <div class="warning">
+                        <strong>⚠️ Attenzione!</strong> Il tempo di trattamento (${treatmentTime} min) 
+                        supera il ciclo fisso di 20 minuti. 
+                        <br><strong>Soluzione:</strong> Ridurre il tempo di trattamento a max 20 minuti.
+                    </div>
+                `;
+            } else {
+                const margin = CONSTANTS.CYCLE_TIME - treatmentTime;
+                recommendationHTML = `
+                    <div class="success">
+                        <strong>✅ Configurazione Fattibile</strong> - Il tempo di trattamento (${treatmentTime} min) 
+                        rientra nel ciclo di 20 minuti con margine di ${margin} min.
+                    </div>
+                `;
+            }
+            
+            if (generator.recommended.oversized) {
+                recommendationHTML += `
+                    <div class="warning">
+                        <strong>⚠️ Attenzione!</strong> La portata richiesta (${generator.requiredCapacity.toFixed(0)} kg/h) 
+                        supera la capacità massima disponibile (800 kg/h). 
+                        Considerare l'installazione di 2 generatori in parallelo o ridurre la produzione target.
+                    </div>
+                `;
+            }
+            
+            const rec = generator.recommended;
+            const utilizationPeak = (generator.requiredCapacity / rec.capacity * 100).toFixed(0);
+            const utilizationAvg = (steam.avgFlow / rec.capacity * 100).toFixed(0);
+            
+            recommendationHTML += `
+                <div class="generator-recommendation">
+                    <h2>🔥 Generatore Consigliato</h2>
+                    <div style="background: rgba(255,255,255,0.2); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <h3 style="font-size: 2em; margin-bottom: 10px;">⭐ ${rec.name}</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 15px;">
+                            <div>
+                                <div style="font-size: 0.9em; opacity: 0.9;">Capacità</div>
+                                <div style="font-size: 1.5em; font-weight: bold;">${rec.capacity} kg/h</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.9em; opacity: 0.9;">Potenza Focolare</div>
+                                <div style="font-size: 1.5em; font-weight: bold;">${rec.power} kW</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.9em; opacity: 0.9;">Investimento</div>
+                                <div style="font-size: 1.5em; font-weight: bold;">${rec.cost.toLocaleString('it-IT')} €</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.9em; opacity: 0.9;">Utilizzo Picco</div>
+                                <div style="font-size: 1.5em; font-weight: bold;">${utilizationPeak}%</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.9em; opacity: 0.9;">Utilizzo Medio</div>
+                                <div style="font-size: 1.5em; font-weight: bold;">${utilizationAvg}%</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.9em; opacity: 0.9;">Dimensione</div>
+                                <div style="font-size: 1.5em; font-weight: bold;">${rec.size}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p style="font-size: 1.1em; margin-bottom: 15px;">
+                        <strong>Portata vapore richiesta:</strong> ${generator.requiredCapacity.toFixed(0)} kg/h (con margine sicurezza 20%)
+                    </p>
+                    
+                    <details style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                        <summary style="cursor: pointer; font-weight: bold; font-size: 1.1em;">📋 Confronto con altre taglie</summary>
+                        <div class="generator-options" style="margin-top: 15px;">
+                            ${generator.all.map(gen => {
+                                const suitable = gen.capacity >= generator.requiredCapacity;
+                                const util = (generator.requiredCapacity / gen.capacity * 100).toFixed(0);
+                                return `
+                                    <div class="generator-option ${gen.capacity === rec.capacity ? 'recommended' : ''}" 
+                                         style="opacity: ${suitable ? '1' : '0.5'}">
+                                        <h3>${gen.name} ${gen.capacity === rec.capacity ? '⭐' : suitable ? '✓' : '✗'}</h3>
+                                        <div class="spec">Capacità: ${gen.capacity} kg/h</div>
+                                        <div class="spec">Potenza: ${gen.power} kW</div>
+                                        <div class="spec">Investimento: ~${gen.cost.toLocaleString('it-IT')} €</div>
+                                        <div class="spec">Utilizzo: ${util}%</div>
+                                        <div class="spec" style="font-weight: bold; color: ${suitable ? '#4CAF50' : '#f44336'}">
+                                            ${suitable ? '✓ ADEGUATO' : '✗ SOTTODIMENSIONATO'}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </details>
+                </div>
+            `;
+            
+            document.getElementById('recommendationBox').innerHTML = recommendationHTML;
+        }
+
+        function updateCharts(batchSize, targetProduction, energy, steam, generator, treatmentTime, targetTemp) {
+            createTemperatureChart(treatmentTime, targetTemp);
+            createSteamFlowChart(treatmentTime);
+            createEnergyChart(energy);
+        }
+
+        function createTemperatureChart(treatmentTime, targetTemp) {
+            const ctx = document.getElementById('temperatureChart');
+            
+            const times = [];
+            const temperatures = [];
+            
+            const heatingTime = treatmentTime * 0.6;
+            const coolingTime = CONSTANTS.CYCLE_TIME - treatmentTime;
+            const ambientTemp = CONSTANTS.ambientTemp;
+            const safeTemp = 40;
+            
+            for (let t = 0; t <= heatingTime; t += 0.5) {
+                times.push(t.toFixed(1));
+                const temp = ambientTemp + (targetTemp - ambientTemp) * (1 - Math.exp(-3 * t / heatingTime));
+                temperatures.push(temp.toFixed(1));
+            }
+            
+            for (let t = heatingTime; t <= treatmentTime; t += 0.5) {
+                times.push(t.toFixed(1));
+                const temp = targetTemp + Math.sin((t - heatingTime) * Math.PI / 2) * 2;
+                temperatures.push(temp.toFixed(1));
+            }
+            
+            for (let t = treatmentTime; t <= CONSTANTS.CYCLE_TIME; t += 0.5) {
+                times.push(t.toFixed(1));
+                const coolingProgress = (t - treatmentTime) / coolingTime;
+                const temp = safeTemp + (targetTemp - safeTemp) * Math.exp(-3 * coolingProgress);
+                temperatures.push(temp.toFixed(1));
+            }
+            
+            if (charts.temperature) {
+                charts.temperature.destroy();
+            }
+            
+            charts.temperature = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: times,
+                    datasets: [{
+                        label: 'Temperatura Terriccio (°C)',
+                        data: temperatures,
+                        borderColor: '#dc3545',
+                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3
+                    }, {
+                        label: 'Target ' + targetTemp + '°C',
+                        data: Array(times.length).fill(targetTemp),
+                        borderColor: '#28a745',
+                        borderDash: [5, 5],
+                        borderWidth: 2,
+                        pointRadius: 0
+                    }, {
+                        label: 'Temp. Scarico Sicura (40°C)',
+                        data: Array(times.length).fill(40),
+                        borderColor: '#6c757d',
+                        borderDash: [2, 2],
+                        borderWidth: 1,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Profilo Termico - Ciclo Fisso 20 Minuti',
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Tempo (minuti) - Ciclo Completo: 20 min' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Temperatura (°C)' },
+                            beginAtZero: false,
+                            min: 0,
+                            max: targetTemp + 20
+                        }
+                    }
+                }
+            });
+        }
+
+        function createSteamFlowChart(treatmentTime) {
+            const ctx = document.getElementById('steamFlowChart');
+            
+            const productions = [];
+            const peakFlows = [];
+            
+            for (let prod = 3; prod <= 15; prod += 0.5) {
+                productions.push(prod);
+                const batchSize = calculateBatchSize(prod);
+                const energy = calculateEnergy(
+                    batchSize,
+                    parseFloat(document.getElementById('soilDensity').value),
+                    parseFloat(document.getElementById('moisture').value),
+                    parseFloat(document.getElementById('targetTemp').value)
+                );
+                const steam = calculateSteamFlow(energy, treatmentTime);
+                peakFlows.push(steam.peakFlow);
+            }
+            
+            if (charts.steamFlow) {
+                charts.steamFlow.destroy();
+            }
+            
+            const datasets = [{
+                label: 'Portata Vapore Picco Richiesta',
+                data: peakFlows,
+                borderColor: '#dc3545',
+                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                fill: true,
+                tension: 0.4,
+                borderWidth: 3
+            }];
+            
+            const generators = [
+                { capacity: 200, color: '#28a745' },
+                { capacity: 300, color: '#17a2b8' },
+                { capacity: 400, color: '#ffc107' },
+                { capacity: 600, color: '#6f42c1' },
+                { capacity: 800, color: '#fd7e14' }
+            ];
+            
+            generators.forEach(gen => {
+                datasets.push({
+                    label: `Gen. ${gen.capacity} kg/h`,
+                    data: Array(productions.length).fill(gen.capacity),
+                    borderColor: gen.color,
+                    borderDash: [5, 5],
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    fill: false
+                });
+            });
+            
+            charts.steamFlow = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: productions,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Portata Vapore vs Produzione (con Ciclo Fisso 20 min)',
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Produzione Target (m³/h)' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Portata Vapore (kg/h)' },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function createEnergyChart(energy) {
+            const ctx = document.getElementById('energyChart');
+            
+            if (charts.energy) {
+                charts.energy.destroy();
+            }
+            
+            charts.energy = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Riscald. Solidi', 'Riscald. Acqua', 'Evaporazione', 'Perdite Termiche', 'Riscald. Vasca'],
+                    datasets: [{
+                        data: [energy.Q1, energy.Q2, energy.Q3, energy.Q4, energy.Q5],
+                        backgroundColor: [
+                            '#2a5298',
+                            '#667eea',
+                            '#764ba2',
+                            '#dc3545',
+                            '#ffc107'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Distribuzione Fabbisogno Energetico per Batch',
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Inizializzazione
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('input[type="range"]').forEach(input => {
+                input.addEventListener('input', updateCalculations);
+            });
+            updateCalculations();
+        });
+    </script>
+</body>
+</html>

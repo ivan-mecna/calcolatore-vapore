@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dimensionamento Impianto Vapore - Ingauna Vapore</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #1a1a1a;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: #0d0d0d;
+            padding: 50px 40px;
+            border-bottom: 3px solid #FF5722;
+        }
+        
+        .header h1 {
+            font-size: 2.8em;
+            font-weight: 800;
+            margin-bottom: 15px;
+            color: #ffffff;
+            letter-spacing: -1px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            color: #b0b0b0;
+            font-weight: 300;
+        }
+        
+        .info-banner {
+            background: #FF5722;
+            color: #ffffff;
+            padding: 20px 40px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        
+        .inputs-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            background: #2d2d2d;
+        }
+        
+        .input-panel {
+            padding: 60px 50px;
+            background: #1a1a1a;
+            position: relative;
+        }
+        
+        .input-panel:first-child {
+            border-right: 3px solid #FF5722;
+        }
+        
+        .input-panel h2 {
+            color: #FF5722;
+            font-size: 1.6em;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .input-panel label {
+            display: block;
+            font-weight: 400;
+            color: #b0b0b0;
+            margin-bottom: 20px;
+            font-size: 1em;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        
+        .input-panel input[type="range"] {
+            width: 100%;
+            margin: 25px 0;
+            cursor: pointer;
+            height: 8px;
+            appearance: none;
+            background: #3d3d3d;
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        .input-panel input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            background: #FF5722;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+        
+        .input-panel input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .input-panel input[type="range"]::-moz-range-thumb {
+            width: 28px;
+            height: 28px;
+            background: #FF5722;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+        }
+        
+        .value-display {
+            text-align: center;
+            font-size: 3em;
+            font-weight: 800;
+            color: #FF5722;
+            margin: 30px 0;
+        }
+        
+        .options-section {
+            background: #2d2d2d;
+            padding: 40px 50px;
+            border-top: 2px solid #3d3d3d;
+        }
+        
+        .options-section h3 {
+            color: #FF5722;
+            font-size: 1.4em;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .option-item {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #3d3d3d;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .option-item:hover {
+            border-color: #FF5722;
+        }
+        
+        .option-item input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: #FF5722;
+        }
+        
+        .option-item label {
+            color: #ffffff;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        .results-section {
+            background: #0d0d0d;
+            padding: 60px 40px;
+        }
+        
+        .results-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .results-header h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -1px;
+        }
+        
+        .cycle-info {
+            background: rgba(255, 87, 34, 0.1);
+            border: 2px solid #FF5722;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .cycle-info p {
+            font-size: 1.1em;
+            margin: 8px 0;
+            color: #b0b0b0;
+        }
+        
+        .cycle-info strong {
+            color: #FF5722;
+            font-weight: 700;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+        
+        .result-card {
+            background: #1a1a1a;
+            padding: 35px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #2d2d2d;
+            transition: all 0.3s;
+        }
+        
+        .result-card:hover {
+            background: #252525;
+            border-color: #FF5722;
+            transform: translateY(-5px);
+        }
+        
+        .result-card .label {
+            font-size: 0.85em;
+            color: #b0b0b0;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+        
+        .result-card .value {
+            font-size: 2.8em;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.1;
+        }
+        
+        .result-card .unit {
+            font-size: 0.35em;
+            display: block;
+            margin-top: 8px;
+            color: #FF5722;
+            font-weight: 600;
+        }
+        
+        .status-section {
+            background: #1a1a1a;
+            border: 2px solid #FF5722;
+            padding: 40px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+        }
+        
+        .status-section h3 {
+            font-size: 2em;
+            margin-bottom: 25px;
+            text-align: center;
+            color: #FF5722;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 15px 30px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 1em;
+            margin: 10px 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .badge-perfect {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .badge-good {
+            background: #FFC107;
+            color: #000;
+        }
+        
+        .badge-oversized {
+            background: #f44336;
+            color: white;
+        }
+        
+        .status-message {
+            font-size: 1.15em;
+            line-height: 2;
+            text-align: center;
+            margin-top: 25px;
+            color: #b0b0b0;
+        }
+        
+        .status-message strong {
+            color: #FF5722;
+            font-weight: 700;
+        }
+        
+        .economics-section {
+            background: #2d2d2d;
+            padding: 60px 40px;
+        }
+        
+        .economics-section h3 {
+            color: #ffffff;
+            font-size: 2.2em;
+            margin-bottom: 40px;
+            text-align: center;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+        
+        .economics-section h3::after {
+            content: '';
+            display: block;
+            width: 100px;
+            height: 4px;
+            background: #FF5722;
+            margin: 20px auto 0;
+        }
+        
+        .cost-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .cost-card {
+            background: #1a1a1a;
+            padding: 40px;
+            border-radius: 8px;
+            border: 2px solid #3d3d3d;
+        }
+        
+        .cost-card h4 {
+            color: #FF5722;
+            font-size: 1.5em;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #3d3d3d;
+            font-size: 1em;
+        }
+        
+        .cost-item:last-child {
+            border-bottom: none;
+            font-weight: 700;
+            font-size: 1.3em;
+            margin-top: 20px;
+            padding-top: 25px;
+            border-top: 3px solid #FF5722;
+            color: #FF5722;
+        }
+        
+        .cost-item .label {
+            color: #b0b0b0;
+            font-weight: 400;
+        }
+        
+        .cost-item .amount {
+            color: #ffffff;
+            font-weight: 700;
+        }
+        
+        .cost-item:last-child .label,
+        .cost-item:last-child .amount {
+            color: #FF5722;
+        }
+        
+        .cost-specific {
+            text-align: center;
+            padding: 30px;
+            background: #FF5722;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        
+        .cost-specific p {
+            font-size: 1.4em;
+            color: #ffffff;
+            font-weight: 700;
+        }
+        
+        .cost-specific strong {
+            font-size: 1.3em;
+            font-weight: 800;
+        }
+        
+        .chart-section {
+            background: #0d0d0d;
+            padding: 60px 40px;
+        }
+        
+        .chart-container {
+            background: #1a1a1a;
+            padding: 40px;
+            border-radius: 8px;
+            border: 2px solid #2d2d2d;
+            height: 550px;
+        }
+        
+        .export-section {
+            background: #0d0d0d;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .export-button {
+            background: #FF5722;
+            color: #ffffff;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.2em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .export-button:hover {
+            background: #E64A19;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 87, 34, 0.4);
+        }
+        
+        .export-button:active {
+            transform: translateY(0);
+        }
+        
+        @media print {
+            .inputs-section,
+            .options-section,
+            .export-section,
+            .chart-section {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .inputs-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-panel:first-child {
+                border-right: none;
+                border-bottom: 3px solid #FF5722;
+            }
+            
+            .value-display {
+                font-size: 2.5em;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .cost-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Dimensionamento Impianto Vapore</h1>
+            <p>Sistema di Sterilizzazione Terriccio - Ingauna Vapore S.r.l.</p>
+        </div>
+        
+        <div class="info-banner">
+            CICLO FISSO: 20 MINUTI | 3 BATCH/ORA
+        </div>
+        
+        <div class="inputs-section">
+            <div class="input-panel">
+                <h2>Produzione</h2>
+                <label>Terriccio Sterilizzato</label>
+                <input type="range" id="production" min="1" max="15" step="0.5" value="9">
+                <div class="value-display"><span id="productionValue">9.0</span> m³/h</div>
+            </div>
+            
+            <div class="input-panel">
+                <h2>Generatore</h2>
+                <label>Capacità Vapore</label>
+                <input type="range" id="generator" min="100" max="1500" step="50" value="500">
+                <div class="value-display"><span id="generatorValue">500</span> kg/h</div>
+            </div>
+        </div>
+        
+        <div class="options-section">
+            <h3>Componenti Opzionali</h3>
+            <div class="options-grid">
+                <div class="option-item">
+                    <input type="checkbox" id="optSminuzzatore" checked>
+                    <label for="optSminuzzatore">Sminuzzatore</label>
+                </div>
+                <div class="option-item">
+                    <input type="checkbox" id="optVaglio" checked>
+                    <label for="optVaglio">Vaglio</label>
+                </div>
+                <div class="option-item">
+                    <input type="checkbox" id="optDosatori" checked>
+                    <label for="optDosatori">Dosatori Sostanza Reintegro</label>
+                </div>
+                <div class="option-item">
+                    <input type="checkbox" id="optInstallazione" checked>
+                    <label for="optInstallazione">Installazione</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="results-section" id="resultsSection"></div>
+        
+        <div class="economics-section" id="economicsSection"></div>
+        
+        <div class="chart-section">
+            <div class="chart-container">
+                <canvas id="performanceChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="export-section">
+            <button class="export-button" onclick="exportToPDF()">📄 Scarica Report PDF</button>
+        </div>
+    </div>
+
+    <script>
+        const CONSTANTS = {
+            CYCLE_TIME: 20, BATCHES_PER_HOUR: 3, cpSoilDry: 0.8, cpWater: 4.186,
+            heatVaporization: 2300, ambientTemp: 20, vaporEnthalpy: 2763, waterEnthalpy: 84,
+            evaporationRate: 0.025, heatLoss: 0.10, vesselHeat: 6000, soilDensity: 500,
+            moisture: 45, targetTemp: 85, dieselPCI: 11.83, dieselDensity: 0.84,
+            dieselPrice: 1.65, electricityPrice: 0.20, generatorEfficiency: 0.91
+        };
+
+        let chart = null;
+
+        function calculateSystem(production, generatorCapacity, options) {
+            const batchSize = production / CONSTANTS.BATCHES_PER_HOUR;
+            const totalMass = batchSize * CONSTANTS.soilDensity;
+            const dryMass = totalMass * (1 - CONSTANTS.moisture/100);
+            const waterMass = totalMass * (CONSTANTS.moisture/100);
+            const deltaT = CONSTANTS.targetTemp - CONSTANTS.ambientTemp;
+            
+            const Q1 = dryMass * CONSTANTS.cpSoilDry * deltaT;
+            const Q2 = waterMass * CONSTANTS.cpWater * deltaT;
+            const Q3 = waterMass * CONSTANTS.evaporationRate * CONSTANTS.heatVaporization;
+            const Q4 = (Q1 + Q2 + Q3) * CONSTANTS.heatLoss;
+            const Q5 = CONSTANTS.vesselHeat;
+            const energyKWh = (Q1 + Q2 + Q3 + Q4 + Q5) / 3600;
+            
+            const usefulHeat = CONSTANTS.vaporEnthalpy - CONSTANTS.waterEnthalpy;
+            const steamPerBatch = (energyKWh * 3600) / usefulHeat;
+            const heatingTime = CONSTANTS.CYCLE_TIME * 0.6;
+            const steamPeak = (steamPerBatch * 0.65) / (heatingTime / 60);
+            const steamAvg = steamPerBatch / (CONSTANTS.CYCLE_TIME / 60);
+            
+            const requiredCapacity = steamPeak * 1.20;
+            const utilization = (requiredCapacity / generatorCapacity) * 100;
+            const feasible = requiredCapacity <= generatorCapacity;
+            
+            const dieselConsumption = (energyKWh * production / batchSize) / (CONSTANTS.dieselPCI * CONSTANTS.generatorEfficiency);
+            const dieselLiters = dieselConsumption / CONSTANTS.dieselDensity;
+            const electricityCost = 25.9 * CONSTANTS.electricityPrice;
+            const hourlyCost = dieselLiters * CONSTANTS.dieselPrice + electricityCost;
+            const annualCost = hourlyCost * 2000;
+            
+            const generatorCosts = [
+                { capacity: 200, cost: 28000 }, { capacity: 300, cost: 35000 }, { capacity: 400, cost: 38000 },
+                { capacity: 500, cost: 42000 }, { capacity: 600, cost: 48000 }, { capacity: 800, cost: 58000 },
+                { capacity: 900, cost: 66000 }, { capacity: 1000, cost: 72000 }, { capacity: 1200, cost: 85000 },
+                { capacity: 1500, cost: 105000 }
+            ];
+            
+            const genData = generatorCosts.find(g => g.capacity === generatorCapacity) || { cost: generatorCapacity * 70 };
+            
+            // Moduli linea: -30% base, poi vasche/sminu/vaglio ulteriore -20% = 0.7*0.8 = 0.56 totale
+            const vascaSminuzzatoreCost = (8000 + batchSize * 1500) * 0.56;
+            const sminuzzatoreCost = options.sminuzzatore ? 12000 * 0.56 : 0;
+            const vaglioCost = options.vaglio ? 8000 * 0.56 : 0;
+            const vascaSterilizzazioneCost = (15000 + batchSize * 3500) * 0.56;
+            const raffreddatoreCost = (6000 + batchSize * 800) * 0.56;
+            const vascaMiscelazioneCost = (10000 + batchSize * 1200) * 0.56;
+            const dosatoriCost = options.dosatori ? 5000 * 0.7 : 0; // Solo -30%
+            
+            const lineaCost = vascaSminuzzatoreCost + sminuzzatoreCost + vaglioCost + 
+                             vascaSterilizzazioneCost + raffreddatoreCost + 
+                             vascaMiscelazioneCost + dosatoriCost;
+            
+            // Coclee trasporto (proporzionali alla produzione)
+            const cocleeCost = 6000 + production * 300;
+            
+            // Altri costi (proporzionali alla produzione)
+            const waterTreatmentCost = 3000 + production * 350;
+            const electricalCost = 12000 + production * 400;
+            const installationCost = options.installazione ? (15000 + production * 600) * 0.7 : 0;
+            
+            const totalInvestment = genData.cost + lineaCost + cocleeCost + 
+                                   waterTreatmentCost + electricalCost + installationCost;
+            
+            return {
+                batchSize, heatingTime, steamPerBatch, peakFlow: steamPeak, avgFlow: steamAvg,
+                requiredCapacity, utilization, feasible, dieselLiters, hourlyCost,
+                dailyCost: hourlyCost * 8, annualCost, generatorCost: genData.cost,
+                vascaSminuzzatoreCost, sminuzzatoreCost, vaglioCost, vascaSterilizzazioneCost,
+                raffreddatoreCost, vascaMiscelazioneCost, dosatoriCost, lineaCost,
+                cocleeCost, waterTreatmentCost, electricalCost, installationCost,
+                totalInvestment
+            };
+        }
+
+        function getOptions() {
+            return {
+                sminuzzatore: document.getElementById('optSminuzzatore').checked,
+                vaglio: document.getElementById('optVaglio').checked,
+                dosatori: document.getElementById('optDosatori').checked,
+                installazione: document.getElementById('optInstallazione').checked
+            };
+        }
+
+        function updateCalculations() {
+            const production = parseFloat(document.getElementById('production').value);
+            const generator = parseFloat(document.getElementById('generator').value);
+            const options = getOptions();
+            
+            document.getElementById('productionValue').textContent = production.toFixed(1);
+            document.getElementById('generatorValue').textContent = generator.toFixed(0);
+            
+            const system = calculateSystem(production, generator, options);
+            
+            displayResults(system, production, generator);
+            displayEconomics(system, production, generator, options);
+            updateChart(system, production, generator, options);
+        }
+
+        function displayResults(sys, production, generator) {
+            let statusBadge, statusMessage;
+            
+            if (!sys.feasible) {
+                statusBadge = '<span class="status-badge badge-oversized">GENERATORE INSUFFICIENTE</span>';
+                statusMessage = `Il generatore da <strong>${generator} kg/h</strong> non è sufficiente. Serve almeno <strong>${sys.requiredCapacity.toFixed(0)} kg/h</strong>.`;
+            } else if (sys.utilization >= 75 && sys.utilization <= 90) {
+                statusBadge = '<span class="status-badge badge-perfect">UTILIZZO OTTIMALE</span>';
+                statusMessage = `Il generatore lavora nella zona ideale (75-90%). Massima efficienza, durata e prestazioni.`;
+            } else if (sys.utilization > 90) {
+                statusBadge = '<span class="status-badge badge-good">UTILIZZO ELEVATO</span>';
+                statusMessage = `Il generatore lavora vicino al limite (<strong>${sys.utilization.toFixed(0)}%</strong>). Funziona ma con poco margine.`;
+            } else if (sys.utilization >= 60 && sys.utilization < 75) {
+                statusBadge = '<span class="status-badge badge-good">LEGGERMENTE SOVRADIMENSIONATO</span>';
+                statusMessage = `Il generatore è leggermente sovradimensionato (<strong>${sys.utilization.toFixed(0)}%</strong> utilizzo).`;
+            } else {
+                statusBadge = '<span class="status-badge badge-oversized">MOLTO SOVRADIMENSIONATO</span>';
+                statusMessage = `Il generatore è molto sovradimensionato (<strong>${sys.utilization.toFixed(0)}%</strong> utilizzo).`;
+            }
+            
+            document.getElementById('resultsSection').innerHTML = `
+                <div class="results-header"><h2>Configurazione Impianto</h2></div>
+                <div class="cycle-info">
+                    <p><strong>Ciclo:</strong> ${CONSTANTS.CYCLE_TIME} min | <strong>Batch/h:</strong> ${CONSTANTS.BATCHES_PER_HOUR} | <strong>Vasca:</strong> ${sys.batchSize.toFixed(2)} m³</p>
+                </div>
+                <div class="results-grid">
+                    <div class="result-card"><div class="label">Volume Vasca</div><div class="value">${sys.batchSize.toFixed(1)}<span class="unit">m³</span></div></div>
+                    <div class="result-card"><div class="label">Tempo Riscaldamento</div><div class="value">${sys.heatingTime.toFixed(1)}<span class="unit">min</span></div></div>
+                    <div class="result-card"><div class="label">Vapore/Batch</div><div class="value">${sys.steamPerBatch.toFixed(0)}<span class="unit">kg</span></div></div>
+                    <div class="result-card"><div class="label">Portata Picco</div><div class="value">${sys.peakFlow.toFixed(0)}<span class="unit">kg/h</span></div></div>
+                    <div class="result-card"><div class="label">Portata Media</div><div class="value">${sys.avgFlow.toFixed(0)}<span class="unit">kg/h</span></div></div>
+                    <div class="result-card"><div class="label">Capacità Richiesta</div><div class="value">${sys.requiredCapacity.toFixed(0)}<span class="unit">kg/h</span></div></div>
+                    <div class="result-card" style="border-color:#FF5722;border-width:3px"><div class="label">Utilizzo</div><div class="value" style="color:#FF5722">${sys.utilization.toFixed(0)}<span class="unit">%</span></div></div>
+                    <div class="result-card"><div class="label">Gasolio</div><div class="value">${sys.dieselLiters.toFixed(1)}<span class="unit">l/h</span></div></div>
+                </div>
+                <div class="status-section">
+                    <h3>Valutazione</h3>
+                    <div style="text-align:center">${statusBadge}</div>
+                    <div class="status-message">${statusMessage}</div>
+                </div>
+            `;
+        }
+
+        function displayEconomics(sys, production, generator, options) {
+            let lineaDetails = `
+                <div class="cost-item"><span class="label">Vasca sminuzzatore:</span><span class="amount">${Math.round(sys.vascaSminuzzatoreCost).toLocaleString('it-IT')} €</span></div>
+                ${options.sminuzzatore ? `<div class="cost-item"><span class="label">Sminuzzatore:</span><span class="amount">${Math.round(sys.sminuzzatoreCost).toLocaleString('it-IT')} €</span></div>` : ''}
+                ${options.vaglio ? `<div class="cost-item"><span class="label">Vaglio:</span><span class="amount">${Math.round(sys.vaglioCost).toLocaleString('it-IT')} €</span></div>` : ''}
+                <div class="cost-item"><span class="label">Vasca sterilizzazione:</span><span class="amount">${Math.round(sys.vascaSterilizzazioneCost).toLocaleString('it-IT')} €</span></div>
+                <div class="cost-item"><span class="label">Raffreddatore:</span><span class="amount">${Math.round(sys.raffreddatoreCost).toLocaleString('it-IT')} €</span></div>
+                <div class="cost-item"><span class="label">Vasca miscelazione:</span><span class="amount">${Math.round(sys.vascaMiscelazioneCost).toLocaleString('it-IT')} €</span></div>
+                ${options.dosatori ? `<div class="cost-item"><span class="label">Dosatori reintegro:</span><span class="amount">${Math.round(sys.dosatoriCost).toLocaleString('it-IT')} €</span></div>` : ''}
+            `;
+            
+            document.getElementById('economicsSection').innerHTML = `
+                <h3>Analisi Economica</h3>
+                <div class="cost-grid">
+                    <div class="cost-card">
+                        <h4>Investimento</h4>
+                        <div class="cost-item"><span class="label">Generatore ${generator} kg/h:</span><span class="amount">${sys.generatorCost.toLocaleString('it-IT')} €</span></div>
+                        ${lineaDetails}
+                        <div class="cost-item"><span class="label">Coclee trasporto:</span><span class="amount">${Math.round(sys.cocleeCost).toLocaleString('it-IT')} €</span></div>
+                        <div class="cost-item"><span class="label">Trattamento acqua:</span><span class="amount">${Math.round(sys.waterTreatmentCost).toLocaleString('it-IT')} €</span></div>
+                        <div class="cost-item"><span class="label">Quadro elettrico:</span><span class="amount">${Math.round(sys.electricalCost).toLocaleString('it-IT')} €</span></div>
+                        ${options.installazione ? `<div class="cost-item"><span class="label">Installazione:</span><span class="amount">${Math.round(sys.installationCost).toLocaleString('it-IT')} €</span></div>` : ''}
+                        <div class="cost-item"><span class="label">TOTALE:</span><span class="amount">${Math.round(sys.totalInvestment).toLocaleString('it-IT')} €</span></div>
+                    </div>
+                    <div class="cost-card">
+                        <h4>Operativi</h4>
+                        <div class="cost-item"><span class="label">Gasolio:</span><span class="amount">${sys.dieselLiters.toFixed(1)} l/h</span></div>
+                        <div class="cost-item"><span class="label">Costo gasolio:</span><span class="amount">${(sys.dieselLiters*CONSTANTS.dieselPrice).toFixed(2)} €/h</span></div>
+                        <div class="cost-item"><span class="label">Elettricità:</span><span class="amount">${(25.9*CONSTANTS.electricityPrice).toFixed(2)} €/h</span></div>
+                        <div class="cost-item"><span class="label">Orario:</span><span class="amount">${sys.hourlyCost.toFixed(2)} €/h</span></div>
+                        <div class="cost-item"><span class="label">Giornaliero (8h):</span><span class="amount">${sys.dailyCost.toFixed(2)} €/g</span></div>
+                        <div class="cost-item"><span class="label">ANNUALE (2000h):</span><span class="amount">${Math.round(sys.annualCost).toLocaleString('it-IT')} €</span></div>
+                    </div>
+                </div>
+                <div class="cost-specific"><p><strong>Costo specifico:</strong> ${(sys.hourlyCost/production).toFixed(2)} €/m³</p></div>
+            `;
+        }
+
+        function updateChart(sys, production, generator, options) {
+            const ctx = document.getElementById('performanceChart');
+            const productions = [], utilizations = [], costs = [];
+            
+            for (let p = 1; p <= 15; p += 0.5) {
+                productions.push(p);
+                const t = calculateSystem(p, generator, options);
+                utilizations.push(t.feasible ? t.utilization : null);
+                costs.push(t.hourlyCost);
+            }
+            
+            if (chart) chart.destroy();
+            
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: productions.map(p => p.toFixed(1) + ' m³/h'),
+                    datasets: [{
+                        label: 'Utilizzo (%)',
+                        data: utilizations,
+                        borderColor: '#FF5722',
+                        backgroundColor: 'rgba(255,87,34,0.1)',
+                        borderWidth: 3,
+                        yAxisID: 'y',
+                        pointRadius: productions.map(p => p === production ? 8 : 4),
+                        pointBackgroundColor: productions.map(p => p === production ? '#fff' : '#FF5722'),
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Costo (€/h)',
+                        data: costs,
+                        borderColor: '#ffffff',
+                        backgroundColor: 'rgba(255,255,255,0.05)',
+                        borderWidth: 2,
+                        yAxisID: 'y1',
+                        pointRadius: productions.map(p => p === production ? 8 : 4),
+                        pointBackgroundColor: productions.map(p => p === production ? '#FF5722' : '#fff'),
+                        fill: false,
+                        tension: 0.4
+                    }, {
+                        label: 'Ottimale (80%)',
+                        data: Array(productions.length).fill(80),
+                        borderColor: '#4CAF50',
+                        borderWidth: 2,
+                        borderDash: [10, 5],
+                        pointRadius: 0,
+                        yAxisID: 'y'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Generatore ${generator} kg/h - Prestazioni`,
+                            font: { size: 18, weight: 'bold', family: 'Montserrat' },
+                            color: '#ffffff'
+                        },
+                        legend: { 
+                            position: 'top',
+                            labels: { padding: 20, font: { size: 12, family: 'Montserrat' }, color: '#b0b0b0' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Produzione', font: { size: 14, weight: 'bold' }, color: '#b0b0b0' },
+                            ticks: { color: '#b0b0b0' },
+                            grid: { color: '#2d2d2d' }
+                        },
+                        y: {
+                            position: 'left',
+                            title: { display: true, text: 'Utilizzo (%)', font: { size: 14, weight: 'bold' }, color: '#FF5722' },
+                            min: 0,
+                            max: 120,
+                            ticks: { color: '#FF5722' },
+                            grid: { color: '#2d2d2d' }
+                        },
+                        y1: {
+                            position: 'right',
+                            title: { display: true, text: 'Costo (€/h)', font: { size: 14, weight: 'bold' }, color: '#fff' },
+                            ticks: { color: '#fff' },
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function exportToPDF() {
+            const production = parseFloat(document.getElementById('production').value);
+            const generator = parseFloat(document.getElementById('generator').value);
+            const options = getOptions();
+            const sys = calculateSystem(production, generator, options);
+            
+            // Determina status
+            let statusText = '';
+            let statusColor = '#4CAF50';
+            if (!sys.feasible) {
+                statusText = 'GENERATORE INSUFFICIENTE';
+                statusColor = '#f44336';
+            } else if (sys.utilization >= 75 && sys.utilization <= 90) {
+                statusText = 'UTILIZZO OTTIMALE';
+                statusColor = '#4CAF50';
+            } else if (sys.utilization > 90) {
+                statusText = 'UTILIZZO ELEVATO';
+                statusColor = '#FFC107';
+            } else if (sys.utilization >= 60 && sys.utilization < 75) {
+                statusText = 'LEGGERMENTE SOVRADIMENSIONATO';
+                statusColor = '#FFC107';
+            } else {
+                statusText = 'MOLTO SOVRADIMENSIONATO';
+                statusColor = '#f44336';
+            }
+            
+            const date = new Date().toLocaleDateString('it-IT');
+            
+            let lineaDetailsHTML = `
+                <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;">Vasca sminuzzatore</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #ddd;">${Math.round(sys.vascaSminuzzatoreCost).toLocaleString('it-IT')} €</td></tr>
+                ${options.sminuzzatore ? `<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;">Sminuzzatore</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #ddd;">${Math.round(sys.sminuzzatoreCost).toLocaleString('it-IT')} €</td></tr>` : ''}
+                ${options.vaglio ? `<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;">Vaglio</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #ddd;">${Math.round(sys.vaglioCost).toLocaleString('it-IT')} €</td></tr>` : ''}
+                <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;">Vasca sterilizzazione</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #ddd;">${Math.round(sys.vascaSterilizzazioneCost).toLocaleString('it-IT')} €</td></tr>
+                <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;">Raffreddatore</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #ddd;">${Math.round(sys.raffreddatoreCost).toLocaleString('it-IT')} €</td></tr>
+                <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;">Vasca miscelazione</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #ddd;">${Math.round(sys.vascaMiscelazioneCost).toLocaleString('it-IT')} €</td></tr>
+                ${options.dosatori ? `<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;">Dosatori reintegro</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #ddd;">${Math.round(sys.dosatoriCost).toLocaleString('it-IT')} €</td></tr>` : ''}
+            `;
+            
+            const reportHTML = `
+                <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 800px; color: #333;">
+                    <div style="text-align: center; border-bottom: 3px solid #FF5722; padding-bottom: 15px; margin-bottom: 20px;">
+                        <h1 style="color: #1a1a1a; font-size: 24px; margin: 0 0 10px 0;">DIMENSIONAMENTO IMPIANTO VAPORE</h1>
+                        <h2 style="color: #FF5722; font-size: 16px; margin: 0 0 5px 0;">Ingauna Vapore S.r.l.</h2>
+                        <p style="color: #666; font-size: 12px; margin: 5px 0;">Sistema di Sterilizzazione Terriccio</p>
+                        <p style="color: #999; font-size: 11px; margin: 10px 0 0 0;">Report generato il ${date}</p>
+                    </div>
+                    
+                    <div style="background: #f5f5f5; padding: 15px; margin-bottom: 20px; border-left: 4px solid #FF5722;">
+                        <h3 style="color: #FF5722; margin: 0 0 10px 0; font-size: 14px;">CONFIGURAZIONE IMPIANTO</h3>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                            <tr><td style="padding: 5px 0; font-weight: 600;">Produzione richiesta:</td><td style="text-align: right; font-weight: bold;">${production.toFixed(1)} m³/h</td></tr>
+                            <tr><td style="padding: 5px 0; font-weight: 600;">Generatore selezionato:</td><td style="text-align: right; font-weight: bold;">${generator} kg/h</td></tr>
+                            <tr><td style="padding: 5px 0; font-weight: 600;">Ciclo sterilizzazione:</td><td style="text-align: right;">${CONSTANTS.CYCLE_TIME} minuti</td></tr>
+                            <tr><td style="padding: 5px 0; font-weight: 600;">Batch per ora:</td><td style="text-align: right;">${CONSTANTS.BATCHES_PER_HOUR}</td></tr>
+                            <tr><td style="padding: 5px 0; font-weight: 600;">Volume vasca calcolato:</td><td style="text-align: right; font-weight: bold;">${sys.batchSize.toFixed(2)} m³</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style="background: #fff3e0; padding: 15px; margin-bottom: 20px; border-left: 4px solid ${statusColor};">
+                        <h3 style="color: #333; margin: 0 0 10px 0; font-size: 14px;">VALUTAZIONE SISTEMA</h3>
+                        <p style="font-weight: bold; color: ${statusColor}; font-size: 14px; margin: 0 0 10px 0;">${statusText}</p>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                            <tr><td style="padding: 3px 0;">Utilizzo generatore:</td><td style="text-align: right; font-weight: bold;">${sys.utilization.toFixed(0)}%</td></tr>
+                            <tr><td style="padding: 3px 0;">Portata picco richiesta:</td><td style="text-align: right;">${sys.peakFlow.toFixed(0)} kg/h</td></tr>
+                            <tr><td style="padding: 3px 0;">Capacita richiesta (margine 20%):</td><td style="text-align: right;">${sys.requiredCapacity.toFixed(0)} kg/h</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="color: #FF5722; margin: 0 0 10px 0; border-bottom: 2px solid #FF5722; padding-bottom: 5px; font-size: 14px;">INVESTIMENTO</h3>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                            <tr style="background: #f9f9f9;"><td style="padding: 8px;">Generatore ${generator} kg/h</td><td style="text-align: right; padding: 8px; font-weight: bold;">${sys.generatorCost.toLocaleString('it-IT')} €</td></tr>
+                            ${lineaDetailsHTML}
+                            <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;">Coclee trasporto</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #ddd;">${Math.round(sys.cocleeCost).toLocaleString('it-IT')} €</td></tr>
+                            <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;">Trattamento acqua</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #ddd;">${Math.round(sys.waterTreatmentCost).toLocaleString('it-IT')} €</td></tr>
+                            <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;">Quadro elettrico</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #ddd;">${Math.round(sys.electricalCost).toLocaleString('it-IT')} €</td></tr>
+                            ${options.installazione ? `<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;">Installazione</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #ddd;">${Math.round(sys.installationCost).toLocaleString('it-IT')} €</td></tr>` : ''}
+                            <tr style="background: #FF5722; color: white; font-weight: bold; font-size: 13px;">
+                                <td style="padding: 12px;">TOTALE INVESTIMENTO</td>
+                                <td style="text-align: right; padding: 12px;">${Math.round(sys.totalInvestment).toLocaleString('it-IT')} €</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="color: #FF5722; margin: 0 0 10px 0; border-bottom: 2px solid #FF5722; padding-bottom: 5px; font-size: 14px;">COSTI OPERATIVI</h3>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                            <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;">Consumo gasolio</td><td style="text-align: right; padding: 8px; border-bottom: 1px solid #ddd;">${sys.dieselLiters.toFixed(1)} l/h</td></tr>
+                            <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;">Costo gasolio</td><td style="text-align: right; padding: 8px; border-bottom: 1px solid #ddd;">${(sys.dieselLiters*CONSTANTS.dieselPrice).toFixed(2)} €/h</td></tr>
+                            <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;">Energia elettrica</td><td style="text-align: right; padding: 8px; border-bottom: 1px solid #ddd;">${(25.9*CONSTANTS.electricityPrice).toFixed(2)} €/h</td></tr>
+                            <tr style="background: #f9f9f9; font-weight: 600;"><td style="padding: 8px; border-bottom: 1px solid #ddd;">Costo orario</td><td style="text-align: right; padding: 8px; border-bottom: 1px solid #ddd;">${sys.hourlyCost.toFixed(2)} €/h</td></tr>
+                            <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;">Costo giornaliero (8h)</td><td style="text-align: right; padding: 8px; border-bottom: 1px solid #ddd;">${sys.dailyCost.toFixed(2)} €/giorno</td></tr>
+                            <tr style="background: #FF5722; color: white; font-weight: bold; font-size: 13px;">
+                                <td style="padding: 12px;">COSTO ANNUALE (2000h)</td>
+                                <td style="text-align: right; padding: 12px;">${Math.round(sys.annualCost).toLocaleString('it-IT')} €</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div style="background: #FF5722; color: white; padding: 15px; text-align: center;">
+                        <p style="font-size: 16px; font-weight: bold; margin: 0;">COSTO SPECIFICO: ${(sys.hourlyCost/production).toFixed(2)} €/m³</p>
+                    </div>
+                    
+                    <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; text-align: center; color: #999; font-size: 10px;">
+                        <p style="margin: 5px 0;">Ingauna Vapore S.r.l. - Sistema di Sterilizzazione Terriccio</p>
+                        <p style="margin: 5px 0;">Report generato automaticamente - I prezzi sono indicativi e soggetti a conferma</p>
+                    </div>
+                </div>
+            `;
+            
+            // Crea elemento temporaneo
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = reportHTML;
+            document.body.appendChild(tempDiv);
+            
+            const opt = {
+                margin: [10, 10, 10, 10],
+                filename: `Dimensionamento_Vapore_${production}m3h_${generator}kgh.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            html2pdf().set(opt).from(tempDiv).save().then(function() {
+                document.body.removeChild(tempDiv);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('production').addEventListener('input', updateCalculations);
+            document.getElementById('generator').addEventListener('input', updateCalculations);
+            document.getElementById('optSminuzzatore').addEventListener('change', updateCalculations);
+            document.getElementById('optVaglio').addEventListener('change', updateCalculations);
+            document.getElementById('optDosatori').addEventListener('change', updateCalculations);
+            document.getElementById('optInstallazione').addEventListener('change', updateCalculations);
+            updateCalculations();
+        });
+    </script>
+</body>
+</html>

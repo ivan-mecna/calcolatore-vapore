@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuratori Impianti - Ingauna Vapore</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: #2d2d2d;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            max-width: 900px;
+            width: 100%;
+            padding: 0;
+            animation: slideIn 0.5s ease-out;
+            overflow: hidden;
+            border-top: 3px solid #FF5722;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 40px 30px 40px;
+            background: #1a1a1a;
+            border-bottom: 3px solid #FF5722;
+        }
+
+        h1 {
+            color: #ffffff;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            color: #b0b0b0;
+            font-size: 1.2rem;
+            margin-top: 10px;
+            font-weight: 300;
+        }
+
+        .company-name {
+            color: #FF5722;
+            font-weight: 700;
+            margin-top: 5px;
+            letter-spacing: 1px;
+        }
+
+        .configurators-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3px;
+            margin-top: 0;
+            padding: 40px;
+            background: #2d2d2d;
+        }
+
+        .configurator-card {
+            background: #1a1a1a;
+            border: 2px solid #3d3d3d;
+            border-radius: 8px;
+            padding: 40px 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .configurator-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #FF5722;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .configurator-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(255, 87, 34, 0.3);
+            border-color: #FF5722;
+        }
+
+        .configurator-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .configurator-card:hover .card-icon {
+            transform: scale(1.1);
+        }
+
+        .card-title {
+            color: #ffffff;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            letter-spacing: -0.5px;
+        }
+
+        .card-description {
+            color: #b0b0b0;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            font-weight: 300;
+        }
+
+        .card-button {
+            display: inline-block;
+            background: #FF5722;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-button:hover {
+            background: #E64A19;
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255, 87, 34, 0.4);
+        }
+
+        .features-list {
+            list-style: none;
+            text-align: left;
+            margin: 20px 0;
+            padding: 0;
+        }
+
+        .features-list li {
+            color: #cccccc;
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+            font-size: 0.95rem;
+            font-weight: 300;
+        }
+
+        .features-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #FF5722;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 40px;
+            background: #0d0d0d;
+            color: #b0b0b0;
+            font-size: 0.9rem;
+            font-weight: 300;
+        }
+
+        footer p:first-child {
+            color: #ffffff;
+            font-weight: 400;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 0;
+            }
+
+            header {
+                padding: 30px 20px 25px 20px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .configurators-grid {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+
+            .configurator-card {
+                padding: 30px 20px;
+            }
+
+            footer {
+                padding: 25px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏭 Configuratori Impianti</h1>
+            <p class="subtitle">Sistemi di Sterilizzazione Terriccio</p>
+            <p class="company-name">Ingauna Vapore S.r.l.</p>
+        </header>
+
+        <div class="configurators-grid">
+            <!-- Configuratore Ingauna Vapore -->
+            <div class="configurator-card" onclick="window.location.href='https://ivan-mecna.github.io/calcolatore-vapore/'">
+                <div class="card-icon">🔧</div>
+                <h2 class="card-title">Configuratore Ingauna Vapore</h2>
+                <p class="card-description">
+                    Strumento interno per il dimensionamento completo di impianti di sterilizzazione terriccio con analisi costi dettagliata
+                </p>
+                <ul class="features-list">
+                    <li>Calcolo capacità generatore vapore</li>
+                    <li>Dimensionamento componenti</li>
+                    <li>Analisi costi completa</li>
+                    <li>Report PDF professionale</li>
+                    <li>Configurazione avanzata</li>
+                </ul>
+                <button class="card-button">Apri Configuratore Interno</button>
+            </div>
+
+            <!-- Configuratore Cliente -->
+            <div class="configurator-card" onclick="window.location.href='configuratore-cliente.html'">
+                <div class="card-icon">👥</div>
+                <h2 class="card-title">Configuratore Cliente</h2>
+                <p class="card-description">
+                    Interfaccia semplificata per permettere ai clienti di configurare il proprio impianto di sterilizzazione
+                </p>
+                <ul class="features-list">
+                    <li>Interfaccia user-friendly</li>
+                    <li>Calcolo automatico capacità</li>
+                    <li>Selezione componenti guidata</li>
+                    <li>Preventivo indicativo</li>
+                    <li>Richiesta offerta diretta</li>
+                </ul>
+                <button class="card-button">Apri Configuratore Cliente</button>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2025 Ingauna Vapore S.r.l. - Sistemi di Sterilizzazione Terriccio</p>
+            <p style="margin-top: 5px; font-size: 0.85rem;">Progettato da MECNA AUTOMAZIONE S.r.l.</p>
+        </footer>
+    </div>
+</body>
+</html>
